@@ -15,17 +15,20 @@ class PaSwitchGitHubAccount2018CS:Form{
 	private GitHubAccountEntity[] configJson;
 	private int configJsonCount = 0;
 
+	private string strHttpProxy = "";
+
 	private TableLayoutPanel tlp = new TableLayoutPanel();
 	private AnchorStyles as1 = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
-	private const int nCommandCount = 4;
+	private const int nConfigCount = 3;
+	private const int nCommandCount = 6;
 	private Button[] btnCommand = new Button[nCommandCount];
 	private string[] A_strGitConfigFiles = {".gitconfig", ".git-credentials"};
-	private string[] A_strButtonTexts = {"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"};
+	private string[] A_strButtonTexts = {"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"};
 
 	private string strFolderUserProfile = Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
 
 	protected override Size DefaultSize {
-		get{ return new Size(300, 300); }
+		get{ return new Size(300, 360); }
 	}
 
 	public string ReadTextFile(string strFile){
@@ -45,17 +48,28 @@ class PaSwitchGitHubAccount2018CS:Form{
 	public PaSwitchGitHubAccount2018CS(){
 		this.Text = "PaSwitchGitHubAccount2018CS.cs";
 		this.StartPosition = FormStartPosition.CenterScreen;
+		this.MinimumSize = new Size(300, 360);
 
 		try{
 			string configData = AESDecrypt( ConfigurationManager.AppSettings["configData"] );
 
+			strHttpProxy = ConfigurationManager.AppSettings["configHttpProxy"];
+
+			// Console.WriteLine(configData);
+
+			// string strGitConfig = ReadTextFile("PaSwitchGitHubAccount2018CS.json");
+			// string strEncrypt = AESEncrypt( strGitConfig );
+			// Console.WriteLine( strEncrypt );
+
 			configJson = jss.Deserialize<GitHubAccountEntity[]>(configData);
 			configJsonCount = configJson.Length;
-			if(configJsonCount == 2){
+			if(configJsonCount == nConfigCount){
 				A_strButtonTexts[0] = configJson[0].strUserTitle;
 				A_strButtonTexts[1] = configJson[1].strUserTitle;
-				A_strButtonTexts[2] = configJson[0].strFolder;
-				A_strButtonTexts[3] = configJson[1].strFolder;
+				A_strButtonTexts[2] = configJson[2].strUserTitle;
+				A_strButtonTexts[3] = configJson[0].strFolder;
+				A_strButtonTexts[4] = configJson[1].strFolder;
+				A_strButtonTexts[5] = configJson[2].strFolder;
 			}
 
 		}catch(Exception ex){
@@ -71,7 +85,7 @@ class PaSwitchGitHubAccount2018CS:Form{
 
 		this.tlp.Anchor = as1;
 		this.tlp.ColumnCount = 1;
-		this.tlp.RowCount = 4;
+		this.tlp.RowCount = nCommandCount;
 		this.tlp.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
 		for(int i = 0; i < nCommandCount; i++){
@@ -113,11 +127,14 @@ class PaSwitchGitHubAccount2018CS:Form{
 	}
 
 	private void PA_WriteGitConfig(int n){
-		if(configJsonCount >= 2){
+		if(configJsonCount >= nConfigCount){
 			string strContent = string.Format(
 				"[user]\n\tname = {0}\n\temail = {1}\n[credential]\n\thelper = store\n",
 				configJson[n].strUserName, configJson[n].strUserEmail
 			);
+			if(n < 2 && !string.IsNullOrEmpty(strHttpProxy)){
+				strContent += "[http]\n\tproxy = " + strHttpProxy + "\n";
+			}
 			PA_WriteTextFile(strFolderUserProfile + A_strGitConfigFiles[0], strContent);
 
 			strContent = configJson[n].strUserCredential + "\n";
@@ -134,7 +151,7 @@ class PaSwitchGitHubAccount2018CS:Form{
 	}
 
 	private void PA_ExplorerFolder(int n){
-		if(configJsonCount >= 2){
+		if(configJsonCount >= nConfigCount){
 			System.Diagnostics.Process.Start(configJson[n].strFolder);
 		}else{
 			MessageBox.Show("no config data");
@@ -158,10 +175,16 @@ class PaSwitchGitHubAccount2018CS:Form{
 			PA_WriteGitConfig(1);
 			break;
 		case 2:
-			PA_ExplorerFolder(0);
+			PA_WriteGitConfig(2);
 			break;
 		case 3:
+			PA_ExplorerFolder(0);
+			break;
+		case 4:
 			PA_ExplorerFolder(1);
+			break;
+		case 5:
+			PA_ExplorerFolder(2);
 			break;
 		default:
 			MessageBox.Show(nCode.ToString());
