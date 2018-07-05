@@ -1,6 +1,7 @@
 // PaSwitchGitHubAccount2018JSC.js
 
 import System;
+import System.IO;
 import System.Drawing;
 import System.Windows.Forms;
 import Accessibility;
@@ -17,12 +18,15 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 	}
 
 	var nCommandCount = 6;
+	var nConfigCount = 3;
 
 	var tlp = new TableLayoutPanel();
 	// var as1 = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
 	var btnCommands = new ButtonDef[nCommandCount];
 	var A_strButtonsText = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com",
 			"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"];
+
+	var strFolderUserProfile = Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
 
 	protected override function get_DefaultSize(){
 		return new System.Drawing.Size(300, 360);
@@ -75,11 +79,28 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 	}
 
 	function btnCommands_Click(n){
-		MessageBox.Show("click" + n);
+		switch(n){
+		case 3:
+			PA_ExplorerFolder(0);
+			break;
+		case 4:
+			PA_ExplorerFolder(1);
+			break;
+		case 5:
+			PA_ExplorerFolder(2);
+			break;
+		default:
+			MessageBox.Show("click" + n);
+			break;
+		}
 	}
 
 	function PA_ExplorerFolder(n){
-		System.Diagnostics.Process.Start("E:\\git-folder\\git-asm32cn");
+		if(nCommandCount >= nConfigCount){
+			System.Diagnostics.Process.Start(strFolderUserProfile);
+		}else{
+			MessageBox.Show("no config data");
+		}
 	}
 
 };
