@@ -7,12 +7,22 @@ import Accessibility;
 
 public class PaSwitchGitHubAccount2018JSC extends Form {
 	var _this = this;
+
+	class ButtonDef extends Button{
+		var nIndex = 0;
+		function ButtonDef(n){ nIndex = n; }
+		protected override function OnClick(e : EventArgs){
+			btnCommands_Click(nIndex);
+		}
+	}
+
 	var nCommandCount = 6;
 
 	var tlp = new TableLayoutPanel();
 	// var as1 = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
-	var btnCommands = new Button[nCommandCount];
-	var A_strButtonsText = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"];
+	var btnCommands = new ButtonDef[nCommandCount];
+	var A_strButtonsText = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com",
+			"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"];
 
 	protected override function get_DefaultSize(){
 		return new System.Drawing.Size(300, 360);
@@ -24,6 +34,8 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 		_this.set_MinimumSize(new System.Drawing.Size(300, 360));
 
 		initUI();
+
+		// PA_ExplorerFolder(1);
 	}
 
 	function initUI(){
@@ -41,7 +53,10 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 			_this.tlp.RowStyles.Add(new RowStyle(SizeType.Percent, 16.6));
 		}
 		for(var i = 0; i < nCommandCount; i++){
-			btnCommands[i] = new Button();
+			btnCommands[i] = new ButtonDef(i);
+
+			// btnCommands[i].nIndex = i;
+
 			btnCommands[i].Anchor = as1;
 			// btnCommands[i].Anchor = as1;
 			btnCommands[i].Dock = DockStyle.Fill;
@@ -58,6 +73,15 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 		_this.ResumeLayout(false);
 		_this.tlp.Dock = DockStyle.Fill;
 	}
+
+	function btnCommands_Click(n){
+		MessageBox.Show("click" + n);
+	}
+
+	function PA_ExplorerFolder(n){
+		System.Diagnostics.Process.Start("E:\\git-folder\\git-asm32cn");
+	}
+
 };
 
 // MessageBox.Show("PaSwitchGitHubAccount2018JSC.js");
