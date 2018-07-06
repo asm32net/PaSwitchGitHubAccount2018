@@ -6,7 +6,7 @@ set strAppName=PaSwitchGitHubAccount2018JSC
 echo %strLinker%
 echo.
 
-set strCmd=%strLinker% /target:exe %strAppName%.js
+set strCmd=%strLinker% /target:winexe %strAppName%.js
 echo #%strCmd%
 %strCmd%
 
