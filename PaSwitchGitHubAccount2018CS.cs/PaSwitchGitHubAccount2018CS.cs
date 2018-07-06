@@ -152,7 +152,11 @@ class PaSwitchGitHubAccount2018CS:Form{
 
 	private void PA_ExplorerFolder(int n){
 		if(configJsonCount >= nConfigCount){
-			System.Diagnostics.Process.Start(configJson[n].strFolder);
+			try{
+				System.Diagnostics.Process.Start(configJson[n].strFolder);
+			}catch(Exception ex){
+				MessageBox.Show("Exception: " + ex.Message);
+			}
 		}else{
 			MessageBox.Show("no config data");
 		}
