@@ -5,6 +5,7 @@ import System.IO;
 import System.Drawing;
 import System.Windows.Forms;
 import System.Text;
+import System.Configuration;
 import System.Security.Cryptography;
 import Accessibility;
 
@@ -22,10 +23,17 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 	var nCommandCount = 6;
 	var nConfigCount = 3;
 
+	var configJson,
+		configJsonCount;
+	var strHttpProxy = "";
+
+	// var jss = new JavaScriptSerializer();
+
 	var tlp = new TableLayoutPanel();
 	// var as1 = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
 	var btnCommands = new ButtonDef[nCommandCount];
-	var A_strButtonsText = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com",
+	var A_strGitConfigFiles = [".gitconfig", ".git-credentials"];
+	var A_strButtonTexts = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com",
 			"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"];
 
 	var strFolderUserProfile = Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
@@ -39,9 +47,30 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 		_this.StartPosition = FormStartPosition.CenterScreen;
 		_this.set_MinimumSize(new System.Drawing.Size(300, 360));
 
+
+		try{
+			var configData = AESDecrypt( ConfigurationManager.AppSettings["configData"] );
+			strHttpProxy = ConfigurationManager.AppSettings["configHttpProxy"] || "";
+			// Console.WriteLine(configData);
+			// Console.WriteLine(strHttpProxy);
+
+			configJson = eval(configData);
+			configJsonCount = configJson.length;
+			if(configJsonCount == nConfigCount){
+				A_strButtonTexts[0] = configJson[0].strUserTitle;
+				A_strButtonTexts[1] = configJson[1].strUserTitle;
+				A_strButtonTexts[2] = configJson[2].strUserTitle;
+				A_strButtonTexts[3] = configJson[0].strFolder;
+				A_strButtonTexts[4] = configJson[1].strFolder;
+				A_strButtonTexts[5] = configJson[2].strFolder;
+			}
+
+		}catch(ex){
+			MessageBox.Show("Exception: " + ex.message);
+		}
+
 		initUI();
 
-		Console.WriteLine( AESEncrypt("aaa..") );
 	}
 
 	function initUI(){
@@ -61,14 +90,11 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 		for(var i = 0; i < nCommandCount; i++){
 			btnCommands[i] = new ButtonDef(i);
 
-			// btnCommands[i].nIndex = i;
-
 			btnCommands[i].Anchor = as1;
-			// btnCommands[i].Anchor = as1;
 			btnCommands[i].Dock = DockStyle.Fill;
 			btnCommands[i].BackColor = Color.FromArgb(204, 204, 204);
 
-			btnCommands[i].Text = A_strButtonsText[i];
+			btnCommands[i].Text = A_strButtonTexts[i];
 
 			_this.tlp.Controls.Add(btnCommands[i], 0, i);
 		}
@@ -82,6 +108,13 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 
 	function btnCommands_Click(n){
 		switch(n){
+		case 0:
+			PA_WriteGitConfig(0); break;
+		case 1:
+			PA_WriteGitConfig(1); break;
+		case 2:
+			PA_WriteGitConfig(2); break;
+
 		case 3:
 			PA_ExplorerFolder(0); break;
 		case 4:
@@ -89,14 +122,51 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 		case 5:
 			PA_ExplorerFolder(2); break;
 		default:
-			MessageBox.Show("click" + n);
+			// MessageBox.Show("click" + n);
 			break;
+		}
+	}
+
+	function PA_WriteTextFile(strFile, strContent){
+		try{
+			var sw = new StreamWriter(strFile);
+			sw.Write(strContent);
+			// sw.Flash();
+			sw.Close();
+		}catch(ex){
+			MessageBox.Show("Exception: " + ex.message);
+		}
+	}
+
+	function PA_WriteGitConfig(n){
+		if(configJsonCount >= nConfigCount){
+			var strContent = String.Format(
+				"[user]\n\tname = {0}\n\temail = {1}\n[credential]\n\thelper = store\n",
+				configJson[n].strUserName, configJson[n].strUserEmail
+			);
+			if(n < 2 && !String.IsNullOrEmpty(strHttpProxy)){
+				strContent += "[http]\n\tproxy = " + strHttpProxy + "\n";
+			}
+			PA_WriteTextFile(strFolderUserProfile + A_strGitConfigFiles[0], strContent);
+
+			strContent = configJson[n].strUserCredential + "\n";
+			for(var i = 0; i < configJsonCount; i++){
+				if(i != n){
+					strContent += configJson[i].strUserCredential + "\n";
+				}
+			}
+			PA_WriteTextFile(strFolderUserProfile + A_strGitConfigFiles[1], strContent);
+
 		}
 	}
 
 	function PA_ExplorerFolder(n){
 		if(nCommandCount >= nConfigCount){
-			System.Diagnostics.Process.Start(strFolderUserProfile);
+			try{
+				System.Diagnostics.Process.Start(configJson[n].strFolder);
+			}catch(ex){
+				MessageBox.Show("Exception: " + ex.message);
+			}
 		}else{
 			MessageBox.Show("no config data");
 		}
