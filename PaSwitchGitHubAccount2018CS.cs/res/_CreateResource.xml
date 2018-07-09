@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="gb2312" ?>
+<config>
+	<strOutputFile strFile="..\PaSwitchGitHubAccount2018CS.resources" />
+	<define>
+		<Icon strFile="..\PaSwitchGitHubAccount2018CS.ico" strResourceName="this.ico" />
+		<String strContent="PaSwitchGitHubAccount2018CS" strResourceName="string.name" />
+	</define>
+</config>
