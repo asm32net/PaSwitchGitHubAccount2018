@@ -22,13 +22,13 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 	public PaSwitchGitHubAccount2018JFrame(){
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle(strWindowTitle);
-		this.setSize(300, 300);
+		this.setSize(300, 360);
 		this.setLocationRelativeTo(null);
-		this.setMinimumSize(new Dimension(300, 300));
-		
-		this.setVisible(true);
+		this.setMinimumSize(new Dimension(300, 360));
 
 		initUI();
+
+		this.setVisible(true);
 	}
 	public void initUI(){
 		gbc.fill = GridBagConstraints.BOTH;
