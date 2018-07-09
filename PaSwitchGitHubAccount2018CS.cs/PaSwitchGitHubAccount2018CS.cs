@@ -49,6 +49,10 @@ class PaSwitchGitHubAccount2018CS:Form{
 		this.Text = "PaSwitchGitHubAccount2018CS.cs";
 		this.StartPosition = FormStartPosition.CenterScreen;
 		this.MinimumSize = new Size(300, 360);
+		this.Icon = (Icon)((new System.Resources.ResourceManager(
+			"PaSwitchGitHubAccount2018CS",
+			System.Reflection.Assembly.GetExecutingAssembly())).GetObject("this.ico")
+		);
 
 		try{
 			string configData = AESDecrypt( ConfigurationManager.AppSettings["configData"] );
