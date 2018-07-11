@@ -23,7 +23,8 @@ class PaSwitchGitHubAccount2018CS:Form{
 	private const int nCommandCount = 6;
 	private Button[] btnCommand = new Button[nCommandCount];
 	private string[] A_strGitConfigFiles = {".gitconfig", ".git-credentials"};
-	private string[] A_strButtonTexts = {"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"};
+	private string[] A_strButtonTexts = {"account1@github.com", "account2@github.com", "account3@github.com",
+		"E:\\git-folder\\git-account1", "E:\\git-folder\\git-account2", "E:\\git-folder\\git-account3"};
 
 	private string strFolderUserProfile = Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
 
