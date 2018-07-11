@@ -33,8 +33,8 @@ public class PaSwitchGitHubAccount2018JSC extends Form {
 	// var as1 = ((AnchorStyles)((((AnchorStyles.Top | AnchorStyles.Bottom) | AnchorStyles.Left) | AnchorStyles.Right)));
 	var btnCommands = new ButtonDef[nCommandCount];
 	var A_strGitConfigFiles = [".gitconfig", ".git-credentials"];
-	var A_strButtonTexts = ["asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com",
-			"asm32cn@github.com", "asm32cn@github.com", "asm32cn@github.com"];
+	var A_strButtonTexts = ["account1@github.com", "account2@github.com", "account3@github.com",
+		"E:\\git-folder\\git-account1", "E:\\git-folder\\git-account2", "E:\\git-folder\\git-account3"];
 
 	var strFolderUserProfile = Environment.GetEnvironmentVariable("USERPROFILE") + Path.DirectorySeparatorChar;
 
