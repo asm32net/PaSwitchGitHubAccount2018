@@ -18,9 +18,18 @@ import org.w3c.dom.NodeList;
 
 import javax.swing.JOptionPane;
 
+import java.security.*;
+import javax.crypto.spec.*;
+import javax.crypto.*;
+import java.util.Base64;
+
+
 class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 	// private GridBagLayout gbl = new GridBagLayout();
 	private final String strWindowTitle = "PaSwitchGitHubAccount2018JFrame.java";
+	private static final String CHAR_SET = "utf-8";
+	final static Base64.Encoder b64encoder = Base64.getEncoder();	// Java 1.8 之后支持
+	final static Base64.Decoder b64decoder = Base64.getDecoder();	// Java 1.8 之后支持
 	private final int nCount = 6;
 	private GridBagConstraints gbc = new GridBagConstraints();
 	private String[] buttonsText = {"account1@github.com", "account2@github.com", "account3@github.com",
@@ -34,6 +43,7 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 	private static DocumentBuilderFactory dbFactory = null;
 	private static DocumentBuilder db = null;
 	private Document document = null;
+	private Document document2 = null;
 	private NodeList accountList = null;
 	private NamedNodeMap[] namedNodeMap = null;
 	private int nConfigCount = 0;
@@ -53,6 +63,16 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 		this.setLocationRelativeTo(null);
 		this.setMinimumSize(new Dimension(300, 360));
 
+		// log(
+		// 	b64encoder.encodeToString(
+		// 		encrypt(
+		// 			readTextFile("PaSwitchGitHubAccount2018JFrame.1.config.xml"),
+		// 			"asm32"
+		// 		)
+		// 	)
+		// );
+
+		loadConfig();
 		initUI();
 
 		this.setVisible(true);
@@ -69,23 +89,36 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 		return sValue;
 	}
 
-	public void initUI(){
-		gbc.fill = GridBagConstraints.BOTH;
-		setLayout(new GridBagLayout());
-
-		gbc.insets = new Insets(5, 5, 5, 5);
-		gbc.weightx = 10;
-		gbc.weighty = 10;
-		gbc.gridx = 0;
-		// gbc.gridy = 0;
-		gbc.gridwidth = 1;
-		gbc.gridheight = 1;
-
-		Color btnBackColor = new Color(204, 204, 204);
+	public void loadConfig(){
+		String xmlData = null;
 
 		try{
 			document = db.parse(strConfigFile);
-			accountList = document.getElementsByTagName("account");
+
+			log("loadConfig()");
+			try{
+				xmlData = document
+					.getElementsByTagName("config") // NodeList
+					.item(0)                        // org.w3c.dom.Node
+					.getAttributes()                // NamedNodeMap
+					.getNamedItem("xmlData")        // org.w3c.dom.Node
+					.getTextContent();              // String
+				// log(xmlData);
+			}catch(Exception ex){}
+
+			byte[] byteData = b64decoder.decode(xmlData);
+			// log(".." + byteData.length);
+			byte[] byteXmlData = decrypt( byteData, "asm32" );
+			// log(".." + byteXmlData.length);
+
+			// log( new String(byteXmlData) );
+			// log( new String(byteXmlData, CHAR_SET) );
+
+			ByteArrayInputStream bais = new ByteArrayInputStream(byteXmlData);
+			document2 = db.parse(bais);
+			bais.close();
+
+			accountList = document2.getElementsByTagName("account");
 			nConfigCount = accountList.getLength();
 
 			// log("nConfigCount = " + nConfigCount);
@@ -104,6 +137,22 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 		}catch(Exception ex){
 			log("exception: " + ex.getMessage());
 		}
+	}
+
+	public void initUI(){
+		gbc.fill = GridBagConstraints.BOTH;
+		setLayout(new GridBagLayout());
+
+		gbc.insets = new Insets(5, 5, 5, 5);
+		gbc.weightx = 10;
+		gbc.weighty = 10;
+		gbc.gridx = 0;
+		// gbc.gridy = 0;
+		gbc.gridwidth = 1;
+		gbc.gridheight = 1;
+
+		Color btnBackColor = new Color(204, 204, 204);
+
 
 		for(int i = 0; i < nCount; i++){
 			buttons[i] = new Button( buttonsText[i] );
@@ -192,7 +241,7 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 		System.out.println(s);
 	}
 
-	private boolean writeTextFile(String strFile, String strContent){
+	private static boolean writeTextFile(String strFile, String strContent){
 		File file = new File(strFile);
 		try(FileOutputStream fop = new FileOutputStream(file)){
 			if(!file.exists()){ file.createNewFile(); }
@@ -207,9 +256,58 @@ class PaSwitchGitHubAccount2018JFrame extends JFrame implements ActionListener{
 		return true;
 	}
 
+	public static String readTextFile(String strFile){
+		String strContent = null;
+		try{
+			File file = new File(strFile);
+			byte[] cache = new byte[ (int)(file.length()) ];
+			FileInputStream fis = new FileInputStream(file);
+			fis.read(cache);
+			fis.close();
+			strContent = new String(cache, CHAR_SET);
+		}catch(Exception ex){}
+		return strContent;
+	}
+
 	public static void main(String[] args){
 		PaSwitchGitHubAccount2018JFrame frame = new PaSwitchGitHubAccount2018JFrame();
 
 		System.out.println("PaSwitchGitHubAccount2018JFrame.java");
+	}
+
+	public static byte[] encrypt(String content, String password) {
+		try {
+			KeyGenerator kgen = KeyGenerator.getInstance("AES");// 创建AES的Key生产者
+			kgen.init(128, new SecureRandom(password.getBytes()));// 利用用户密码作为随机数初始化出
+			// 128位的key生产者
+			// 加密没关系，SecureRandom是生成安全随机数序列，password.getBytes()是种子，只要种子相同，序列就一样，所以解密只要有password就行
+			SecretKey secretKey = kgen.generateKey();// 根据用户密码，生成一个密钥
+			byte[] enCodeFormat = secretKey.getEncoded();// 返回基本编码格式的密钥，如果此密钥不支持编码，则返回
+															// null。
+			SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");// 转换为AES专用密钥
+			Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+			byte[] byteContent = content.getBytes("utf-8");
+			cipher.init(Cipher.ENCRYPT_MODE, key);// 初始化为加密模式的密码器
+			byte[] result = cipher.doFinal(byteContent);// 加密
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static byte[] decrypt(byte[] content, String password) {
+		try {
+			KeyGenerator kgen = KeyGenerator.getInstance("AES");// 创建AES的Key生产者
+			kgen.init(128, new SecureRandom(password.getBytes()));
+			SecretKey secretKey = kgen.generateKey();// 根据用户密码，生成一个密钥
+			byte[] enCodeFormat = secretKey.getEncoded();// 返回基本编码格式的密钥
+			SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");// 转换为AES专用密钥
+			Cipher cipher = Cipher.getInstance("AES");// 创建密码器
+			cipher.init(Cipher.DECRYPT_MODE, key);// 初始化为解密模式的密码器
+			byte[] result = cipher.doFinal(content);  
+			return result; // 明文   
+		} catch (Exception e) {}
+		return null;
 	}
 }
