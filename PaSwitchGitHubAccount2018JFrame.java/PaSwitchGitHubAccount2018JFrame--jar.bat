@@ -4,7 +4,7 @@ set strAppName=PaSwitchGitHubAccount2018JFrame
 echo Begin ...
 echo --------------------
 
-javac -d . %strAppName%.java
+javac -encoding utf-8 -d . %strAppName%.java
 echo --------------------
 echo Done.
 
