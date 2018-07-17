@@ -1,5 +1,5 @@
 @echo off
 
-javac PaSwitchGitHubAccount2018JFrame.java
+javac -encoding utf-8 PaSwitchGitHubAccount2018JFrame.java
 
 pause
